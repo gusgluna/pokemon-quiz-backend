@@ -20,6 +20,33 @@ router.get("/", async (request, response) => {
   }
 });
 
+router.get("/:gameMode", async (request, response) => {
+  const gameMode = request.params.gameMode;
+  const responseObj = {};
+  try {
+    const recordsQuick = await Record.find({ gameMode: "quick" })
+      .sort({ points: -1 })
+      .limit(10);
+    const recordsAdvanced = await Record.find({ gameMode: "advanced" })
+      .sort({ points: -1 })
+      .limit(10);
+    if (gameMode == "quick") {
+      responseObj.gameMode = "quick";
+      responseObj.leaderBoard = recordsQuick;
+    }
+    if (gameMode == "advanced") {
+      responseObj.gameMode = "advanced";
+      responseObj.leaderBoard = recordsAdvanced;
+    }
+    if (gameMode != "quick" || gameMode != "advanced") {
+      return response.status(400).json({ error: "bad requuest" });
+    }
+    response.status(200).json(responseObj);
+  } catch (error) {
+    response.status(400).json({ error: error.message });
+  }
+});
+
 router.post("/", async (request, response) => {
   const record = new Record({
     name: request.body.name,
